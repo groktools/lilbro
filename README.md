@@ -7,6 +7,8 @@ As found by [Maalej et al](https://mobis.informatik.uni-hamburg.de/wp-content/up
 
 `lilbro` takes this idea to the simplest and extreme manifestation - a tracker for everything that you could do on a computer so that you can review it later, reflect on it and potentially share it.
 
+![Screenshot](https://raw.githubusercontent.com/groktools/lilbro/master/lilbro.png)
+
 # Design
 `lilbro` has three logical components:
 

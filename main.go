@@ -5,6 +5,7 @@ import(
   "log"
   "net/http"
   "os"
+  "time"
 )
 
 func main() {
@@ -30,10 +31,18 @@ func main() {
 func tracker(f *os.File) func(w http.ResponseWriter, r *http.Request) {
   return func(w http.ResponseWriter, r *http.Request){
     timestamp := r.URL.Query().Get("ts")
+    loggedTs:= ""
+    if timestamp != "" {
+      ts,err := time.Parse(time.UnixDate,timestamp)
+      if err == nil{
+        loggedTs = fmt.Sprintf("%v",ts)
+      }
+    }
+    recdTs := time.Now()
     user := r.URL.Query().Get("u")
     context := r.URL.Query().Get("ctx")
     action := r.URL.Query().Get("axn")
-    logTxt :=fmt.Sprintf("%v,%s,%s,%s\n",timestamp,user,context,action)
+    logTxt :=fmt.Sprintf("%s,%v,%s,%s,%s\n",loggedTs,recdTs,user,context,action)
     f.WriteString(logTxt)
   }
 }

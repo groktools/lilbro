@@ -1,30 +1,41 @@
 package main
 
 import(
-  // "fmt"
+  "fmt"
   "log"
   "net/http"
+  "os"
 )
 
 func main() {
-    h:= http.NewServeMux()
+  // open log file
+  tlog,err := os.OpenFile("lilbro.log", os.O_CREATE | os.O_APPEND | os.O_WRONLY, 0666)
+  if err!=nil{
+    panic(err)
+  }
+  defer tlog.Close()
 
-    h.HandleFunc("/track", tracker)
-    h.HandleFunc("/", errHandler)
+  h:= http.NewServeMux()
 
-    log.Println("Lilbro started.")
-    err := http.ListenAndServe(":9999",h)
-    if err != nil {
-      log.Fatal(err)
-    }
+  h.HandleFunc("/track", tracker(tlog))
+  h.HandleFunc("/", errHandler)
+
+  log.Println("Lilbro started.")
+  err = http.ListenAndServe(":9999",h)
+  if err != nil {
+    log.Fatal(err)
+  }
 }
 
-func tracker(w http.ResponseWriter, r *http.Request) {
-  timestamp := r.URL.Query().Get("ts")
-  user := r.URL.Query().Get("u")
-  context := r.URL.Query().Get("ctx")
-  action := r.URL.Query().Get("axn")
-  log.Printf("%v,%s,%s,%s",timestamp,user,context,action)
+func tracker(f *os.File) func(w http.ResponseWriter, r *http.Request) {
+  return func(w http.ResponseWriter, r *http.Request){
+    timestamp := r.URL.Query().Get("ts")
+    user := r.URL.Query().Get("u")
+    context := r.URL.Query().Get("ctx")
+    action := r.URL.Query().Get("axn")
+    logTxt :=fmt.Sprintf("%v,%s,%s,%s\n",timestamp,user,context,action)
+    f.WriteString(logTxt)
+  }
 }
 
 func errHandler(w http.ResponseWriter, r *http.Request) {
